@@ -27,5 +27,7 @@ class Questions(db.Model):
     difficulty = db.Column(db.Integer)
     source = db.Column(db.String(255))
 
+    category = db.Column(db.String(64))
+
     def __repr__(self):
         return '<Question: {}>'.format(self.question)

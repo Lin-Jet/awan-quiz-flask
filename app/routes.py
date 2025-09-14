@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template, request, redirect, url_for, session, g, flash
 from werkzeug.urls import url_parse
-from app.forms import LoginForm, RegistrationForm, QuestionForm
+from app.forms import LoginForm, RegistrationForm, QuestionForm, CATEGORY_MAP, CAT_LIST
 from app.models import User, Questions
 from app import db
 import json
@@ -61,6 +61,8 @@ def question(id):
 
 
     q = Questions.query.filter_by(id=id).first()
+
+    total_questions = Questions.query.count()
     if not q:
         # If no question is found, redirect to the score page.
         return redirect(url_for('score'))
@@ -68,7 +70,7 @@ def question(id):
     # We need to load the choices from the stored JSON string.
     q_choices = json.loads(q.choices)
 
-    if request.method == 'POST':
+    if form.validate_on_submit():
         # Check if the question has a single or multiple correct answers
         is_multi_select = len(q.answer) > 1
 
@@ -77,7 +79,6 @@ def question(id):
             user_options = request.form.getlist('options')
             user_options.sort() # Sort to ensure consistent comparison
             correct_options = sorted(list(q.answer)) # Sort the correct answer string
-
             is_correct = (user_options == correct_options)
         else:
             # For single-choice questions, `request.form['options']` gets the single selected value
@@ -90,12 +91,19 @@ def question(id):
         else:
             flash('Incorrect. The correct answer was {}'.format(q.answer), 'danger')
 
+        # Save the selected category to the current question's database entry
+        selected_category = form.category.data
+        q.category = selected_category
+        db.session.commit()
+        
+        # Simply redirect to the next sequential question
         return redirect(url_for('question', id=(id + 1)))
 
     # Determine if we should render radio buttons or checkboxes
     is_multi_select = len(q.answer) > 1
     
-    return render_template('question.html', form=form, q=q, choices=q_choices, is_multi_select=is_multi_select, title='Question {}'.format(id))
+    return render_template('question.html', form=form, total_questions=total_questions, q=q, choices=q_choices, is_multi_select=is_multi_select, 
+                           title='問題 {}'.format(id), categories=CATEGORY_MAP, descriptions=json.dumps(CAT_LIST))
 
 
 @app.route('/score')

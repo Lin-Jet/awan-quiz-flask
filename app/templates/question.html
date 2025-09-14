@@ -1,26 +1,178 @@
 {% extends 'base.html' %}
 {% block content %}
+    <style>
+        /* Basic CSS for the modal to ensure it works */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #6b7280;
+        }
+        .modal-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-body h4 {
+            font-weight: bold;
+            font-size: 1.125rem;
+            color: #1e40af;
+            margin-bottom: 0.25rem;
+        }
+        .modal-body p {
+            margin-bottom: 1rem;
+        }
+    </style>
+
     <div class="ques-div">
         <form method="post">
-            <h2 class="qnum">Question {{q.id}}</h2>
+            {{ form.hidden_tag() }}
+            <h2 class="qnum">Question {{q.id}} out of {{total_questions}}.</h2>
             <div class="dotted-spaced"></div>
             <hr>
             <h1 class="ques-heading">{{q.question}}</h1>
             <div class="options-div">
-                {% for key, value in choices.items() %}
-                    <div class="form-check">
-                        {% if is_multi_select %}
+                {% if is_multi_select %}
+                    {% for key, value in choices.items() %}
+                        <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="options" value="{{ key }}" id="choice-{{ key }}">
-                        {% else %}
+                            <label class="form-check-label" for="choice-{{ key }}">
+                                {{ value }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    {% for key, value in choices.items() %}
+                        <div class="form-check">
                             <input class="form-check-input" type="radio" name="options" value="{{ key }}" id="choice-{{ key }}">
-                        {% endif %}
-                        <label class="form-check-label" for="choice-{{ key }}">
-                            {{ value }}
-                        </label>
-                    </div>
-                {% endfor %}
+                            <label class="form-check-label" for="choice-{{ key }}">
+                                {{ value }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
-            <button class="btn btn-primary btn-lg sub-btn" type="submit">Submit</button>
+
+            <!-- Category Selection Section -->
+            <div class="category-selection-section" style="padding-top: 2rem; margin-top: 2rem; border-top: 1px solid #e5e7eb;">
+                <h2 style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">請選擇下一個問題的類別</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        {% for option in form.category %}
+                            {% if loop.index <= 4 %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="cat-{{ option.name }}-{{ loop.index }}" name="{{ option.name }}" value="{{ option.data }}">
+                                    <label class="form-check-label" for="cat-{{ option.name }}-{{ loop.index }}">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        {% for option in form.category %}
+                            {% if loop.index > 4 %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="cat-{{ option.name }}-{{ loop.index }}" name="{{ option.name }}" value="{{ option.data }}">
+                                    <label class="form-check-label" for="cat-{{ option.name }}-{{ loop.index }}">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <button type="button" id="show-descriptions-btn" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">查看類別說明</button>
+                <button class="btn btn-primary btn-lg sub-btn" type="submit" style="width: 100%;">Submit</button>
+            </div>
         </form>
     </div>
+
+    <!-- Description Pop-up / Modal -->
+    <div id="descriptions-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="font-size: 1.5rem; font-weight: bold;">類別說明</h3>
+                <button id="close-modal-btn" class="modal-close">&times;</button>
+            </div>
+            <div id="descriptions-content" class="modal-body">
+                <!-- Descriptions will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const descriptions = {{ descriptions | tojson | safe }};
+        const categories = {{ categories | tojson | safe }};
+        console.log("desc outside", descriptions)
+        console.log("outside cate", categories)
+        const showDescriptionsBtn = document.getElementById('show-descriptions-btn');
+        const descriptionsModal = document.getElementById('descriptions-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const descriptionsContent = document.getElementById('descriptions-content');
+        
+        function renderDescriptions() {
+            descriptionsContent.innerHTML = '';
+            console.log("keys: ", Object.keys(categories))
+            Object.keys(categories).forEach(key => {
+                const categoryName = categories[key];
+                console.log(categoryName)
+    
+                const description = JSON.parse(descriptions)[key];
+                console.log(description)
+                const section = document.createElement('div');
+                section.innerHTML = `
+                    <h4>${categoryName}</h4>
+                    <p>${description}</p>
+                `;
+                descriptionsContent.appendChild(section);
+            });
+        }
+
+        showDescriptionsBtn.addEventListener('click', () => {
+            renderDescriptions();
+            descriptionsModal.style.display = 'flex';
+        });
+        
+        closeModalBtn.addEventListener('click', () => {
+            descriptionsModal.style.display = 'none';
+        });
+
+        descriptionsModal.addEventListener('click', (event) => {
+            if (event.target === descriptionsModal) {
+                descriptionsModal.style.display = 'none';
+            }
+        });
+        
+    </script>
 {% endblock %}
