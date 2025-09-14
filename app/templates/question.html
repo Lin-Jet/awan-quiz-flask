@@ -1,22 +1,26 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
     <div class="ques-div">
-        <form method="post" novalidate>
-            <h2 class="qnum">Question {{q.q_id}}</h2>
+        <form method="post">
+            <h2 class="qnum">Question {{q.id}}</h2>
             <div class="dotted-spaced"></div>
             <hr>
-            <h1 class="ques-heading">{{q.ques}}</h1>
+            <h1 class="ques-heading">{{q.question}}</h1>
             <div class="options-div">
-                {{ form.options(class="list-unstyled") }}
+                {% for key, value in choices.items() %}
+                    <div class="form-check">
+                        {% if is_multi_select %}
+                            <input class="form-check-input" type="checkbox" name="options" value="{{ key }}" id="choice-{{ key }}">
+                        {% else %}
+                            <input class="form-check-input" type="radio" name="options" value="{{ key }}" id="choice-{{ key }}">
+                        {% endif %}
+                        <label class="form-check-label" for="choice-{{ key }}">
+                            {{ value }}
+                        </label>
+                    </div>
+                {% endfor %}
             </div>
-            {{ form.submit(class="btn btn-primary btn-lg sub-btn") }}
+            <button class="btn btn-primary btn-lg sub-btn" type="submit">Submit</button>
         </form>
-        <!-- <span class="check-circle">
-            <i class="fas fa-check-circle"></i>
-        </span> -->
     </div>
-
 {% endblock %}
-

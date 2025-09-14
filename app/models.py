@@ -18,13 +18,14 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
 
 class Questions(db.Model):
-    q_id = db.Column(db.Integer, primary_key=True)
-    ques = db.Column(db.String(350), unique=True)
-    a = db.Column(db.String(100))
-    b = db.Column(db.String(100))
-    c = db.Column(db.String(100))
-    d = db.Column(db.String(100))
-    ans = db.Column(db.String(100))
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(350))
+    choices = db.Column(db.Text)  # Stores JSON string of choices
+    answer = db.Column(db.String(100))  # Can store single "A" or multiple "ABE"
+    explanation = db.Column(db.Text)
+    topic = db.Column(db.String(100))
+    difficulty = db.Column(db.Integer)
+    source = db.Column(db.String(255))
 
     def __repr__(self):
-        return '<Question: {}>'.format(self.ques)
+        return '<Question: {}>'.format(self.question)

@@ -30,5 +30,4 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Email already exists.')
 
 class QuestionForm(FlaskForm):
-    options = RadioField('Options: ', validators=[DataRequired()], default=1)
     submit = SubmitField('Next')

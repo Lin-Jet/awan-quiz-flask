@@ -4,7 +4,7 @@ from werkzeug.urls import url_parse
 from app.forms import LoginForm, RegistrationForm, QuestionForm
 from app.models import User, Questions
 from app import db
-
+import json
 
 @app.before_request
 def before_request():
@@ -31,7 +31,6 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         return redirect(next_page)
-        return redirect(url_for('home'))
     if g.user:
         return redirect(url_for('home'))
     return render_template('login.html', form=form, title='Login')
@@ -40,7 +39,7 @@ def login():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.password.data)
+        user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -52,22 +51,51 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
-
 @app.route('/question/<int:id>', methods=['GET', 'POST'])
 def question(id):
-    form = QuestionForm()
-    q = Questions.query.filter_by(q_id=id).first()
-    if not q:
-        return redirect(url_for('score'))
     if not g.user:
         return redirect(url_for('login'))
+    
+    # We will use the form object to render the submit button and the CSRF token.
+    form = QuestionForm()
+
+
+    q = Questions.query.filter_by(id=id).first()
+    if not q:
+        # If no question is found, redirect to the score page.
+        return redirect(url_for('score'))
+    
+    # We need to load the choices from the stored JSON string.
+    q_choices = json.loads(q.choices)
+
     if request.method == 'POST':
-        option = request.form['options']
-        if option == q.ans:
-            session['marks'] += 10
-        return redirect(url_for('question', id=(id+1)))
-    form.options.choices = [(q.a, q.a), (q.b, q.b), (q.c, q.c), (q.d, q.d)]
-    return render_template('question.html', form=form, q=q, title='Question {}'.format(id))
+        # Check if the question has a single or multiple correct answers
+        is_multi_select = len(q.answer) > 1
+
+        if is_multi_select:
+            # For multiple-choice questions, `request.form.getlist` gets a list of selected values
+            user_options = request.form.getlist('options')
+            user_options.sort() # Sort to ensure consistent comparison
+            correct_options = sorted(list(q.answer)) # Sort the correct answer string
+
+            is_correct = (user_options == correct_options)
+        else:
+            # For single-choice questions, `request.form['options']` gets the single selected value
+            user_option = request.form['options']
+            is_correct = (user_option == q.answer)
+
+        if is_correct:
+            session['marks'] = session.get('marks', 0) + 1
+            flash('Correct! Your score is now {}'.format(session['marks']), 'success')
+        else:
+            flash('Incorrect. The correct answer was {}'.format(q.answer), 'danger')
+
+        return redirect(url_for('question', id=(id + 1)))
+
+    # Determine if we should render radio buttons or checkboxes
+    is_multi_select = len(q.answer) > 1
+    
+    return render_template('question.html', form=form, q=q, choices=q_choices, is_multi_select=is_multi_select, title='Question {}'.format(id))
 
 
 @app.route('/score')
