@@ -87,13 +87,16 @@ def question(id):
 
         if is_correct:
             session['marks'] = session.get('marks', 0) + 1
-            flash('Correct! Your score is now {}'.format(session['marks']), 'success')
+            flash('Correct! Explanation: {} Your score is now {}'.format(q.explanation, session['marks']), 'success')
         else:
-            flash('Incorrect. The correct answer was {}'.format(q.answer), 'danger')
+            flash('Incorrect. The correct answer was {} Explanation: {}'.format(q.answer, q.explanation), 'danger')
 
         # Save the selected category to the current question's database entry
         selected_category = form.category.data
-        q.category = selected_category
+        print("selected_category: ", selected_category)
+        category_str = CATEGORY_MAP.get(selected_category)
+        print("category_str: ", category_str)
+        q.category = category_str
         db.session.commit()
         
         # Simply redirect to the next sequential question
@@ -102,7 +105,7 @@ def question(id):
     # Determine if we should render radio buttons or checkboxes
     is_multi_select = len(q.answer) > 1
     
-    return render_template('question.html', form=form, total_questions=total_questions, q=q, choices=q_choices, is_multi_select=is_multi_select, 
+    return render_template('question.html', form=form, score=session['marks'], total_questions=total_questions, q=q, choices=q_choices, is_multi_select=is_multi_select, 
                            title='問題 {}'.format(id), categories=CATEGORY_MAP, descriptions=json.dumps(CAT_LIST))
 
 

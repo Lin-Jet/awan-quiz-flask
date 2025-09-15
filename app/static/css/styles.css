@@ -235,6 +235,7 @@ form hr {
 
 
 .ques-heading {
+    font-size: 1.5em;
     font-weight: 800;
     margin-bottom: 33px;
     /* color: #fff; */
@@ -267,6 +268,14 @@ form hr {
 /* .options-div input{
     margin-top: 10px;
 } */
+
+.category-selection-section{
+    padding-top: 2rem; 
+    margin-top: 2rem; 
+    border-top: 1px solid #e5e7eb;
+    /* outline: blue solid 3px; */
+    max-width: 60rem;
+}
 
 .sub-btn {
     display: block;
