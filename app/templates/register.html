@@ -8,12 +8,13 @@
                 {{ form.hidden_tag() }}
                 <div class="register-intro">
                     <h1>Create your <br>Account now!</h1>
-                    <p>Get unlimited typeforms, questions and responses. <br> Free Forever.</p>
+                    <p>Thank you for participating in our test 🙂 <br> Good Luck!</p>
                 </div>
 
-                <!-- <div class="alert alert-danger">
+                {% if form.username.errors or form.email.errors or form.password.errors or form.password2.errors %}
+                <div class="alert alert-danger">
                 {% for error in form.username.errors %}
-                    {{ error }} 
+                    <br>{{ error }} 
                 {% endfor %}
                 {% for error in form.email.errors %}
                     <br>{{ error }}
@@ -24,7 +25,8 @@
                 {% for error in form.password2.errors %}
                     <br>{{ error }}
                 {% endfor %}
-                </div> -->
+                </div>
+                {% endif %}
 
             
                 <div class="form-para">
@@ -73,9 +75,12 @@
                 </div>
                 
                 <div class="form-para">
-                    <p>Already have an account? <a href="#">Login</a></p>
+                    <p>Already have an account? <a href="/login">Login</a></p>
                 </div>
             </form>
         </div>
     </div>
+    <script>
+
+    </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, RadioField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms import widgets, StringField, PasswordField, BooleanField, SubmitField, RadioField, IntegerField, SelectMultipleField
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, NumberRange
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 
 from app.models import User
@@ -26,7 +26,6 @@ CAT_LIST = {
     "7": "本類別主要用於分類與中醫藥在外科、皮膚科和傷科疾病方面的診療問題。它涵蓋了瘡瘍、癰疽、瘰癧、乳腺病等外科疾病，以及濕疹、痤瘡、銀屑病等皮膚病。此外，所有關於跌打損傷、骨折、脫臼、筋傷等外傷疾病的診斷、治療和康復，以及使用外用藥膏、敷貼、正骨手法等治療方法的問題，都應歸入此類別。簡而言之，任何關於中醫治療體表疾病、外傷和皮膚問題的臨床應用，都屬於此類別。",
     "8": "本類別專門用於分類與中醫眼、耳、鼻、喉等五官疾病的診治相關的問題。它涵蓋了眼部疾病（如結膜炎、白內障）、耳部疾病（如耳鳴、耳聾）、鼻部疾病（如鼻炎、鼻竇炎）和咽喉疾病（如扁桃體炎、咽炎）的病因病機、辨證論治、方藥選擇以及針灸、推拿等治療方法。簡而言之，任何關於中醫藥如何診斷和治療眼、耳、鼻、喉等五官系統疾病的臨床問題都屬於此類別。"
 }
-
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -54,6 +53,20 @@ class RegistrationForm(FlaskForm):
 
 
 
+# class QuestionForm(FlaskForm):
+#     # category = SelectMultipleField('請選擇下一個類別', choices=CATEGORY_MAP, validators=[DataRequired()])
+#     difficulty = IntegerField('请选择问题难度（1至5之间）', validators=[DataRequired(), NumberRange(min=1, max=5, message="请选择问题难度（1至5之间")])
+#     submit = SubmitField('提交並繼續', validators=[DataRequired()])
+
 class QuestionForm(FlaskForm):
-    category = RadioField('請選擇下一個類別', choices=CATEGORY_MAP.items(), validators=[DataRequired()])
-    submit = SubmitField('提交並繼續')
+    # This field will handle both single and multiple-choice questions
+    # by using RadioField for single and a List for multiple.
+    options = SelectMultipleField('Options', validators=[DataRequired()])
+    
+    # This field handles the categories.
+    category = SelectMultipleField('Category', validators=[DataRequired()])
+    
+    # This field handles the difficulty, ensuring it's an integer between 1 and 5.
+    difficulty = IntegerField('Difficulty', validators=[DataRequired(), NumberRange(min=1, max=5)])
+    
+    submit = SubmitField('下一个')

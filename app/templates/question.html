@@ -52,9 +52,17 @@
     </style>
 
     <div class="ques-div">
-        <form method="post">
+        <form method="post" id="question-form">
             {{ form.hidden_tag() }}
-            <h2 class="qnum">Question {{q.id}} out of {{total_questions}}. Score {{score}}</h2>
+            <div class="ques-infobar">
+                <h2 class="qnum">Question {{q.id + 1}}/{{total_questions}} {{is_multi_select_txt}}.</h2>
+
+                <div class="ques-infobar-buttons">
+                    <button type="button" class="flag-button" id="flag-button">問題錯誤</button>
+                    <button type="button" class="stop-button" id="stop-button">暫停</button>
+                </div>
+            </div>
+
             <div class="dotted-spaced"></div>
             <hr>
             <h1 class="ques-heading">{{q.question}}</h1>
@@ -81,23 +89,53 @@
             </div>
 
             <!-- Category Selection Section -->
-            <div class="category-selection-section" style="">
+            <div class="category-selection-section">
                 <h2 style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">請選擇下一個問題的類別</h2>
+                <!-- this shuold have have the categories wit hcheckboxes cause you cna selsct mutlipel ... -->
                 <div class="row">
                     {% for option in form.category %}
                         <div class="col-md-3">
                             <div class="form-check">
-                                {{ option(class="form-check-input") }}
-                                {{ option.label(class="form-check-label") }}
+                                <!-- <input class="form-check-input" type="checkbox" name="category" value="{{ key }}" id="category-{{ key }}">
+                                <label class="form-check-label" for="choice-{{ key }}">
+                                    {{ value }}
+                                </label> -->
+                                <!-- {{ option(class="form-check-input") }}
+                                {{ option.label(class="form-check-label") }} -->
+                                <input class="form-check-input" type="checkbox" name="{{ option.name }}" value="{{ option.data }}" id="{{ option.id }}">
+                                <label class="form-check-label" for="{{ option.id }}">
+                                    {{ option.label.text }}
+                                </label>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             </div>
 
+            <!-- Difficulty Selection Section -->
+            <div class="difficulty-selection-section">
+                <h2 style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">請選擇問題難度（1至5之間）</h2>
+                <div class="flex justify-center">
+                    {{ form.difficulty(
+                        class="w-20 px-4 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                        placeholder="1-5", 
+                        type="number", 
+                        min="1", 
+                        max="5",
+                        oninput="this.value = this.value.replace(/[^1-5]/g, '').slice(0, 1);"
+                    ) }}
+                </div>
+            </div>
+
+            <!-- Hidden input to store the info -->
+            <input type="hidden" name="is_flagged" id="is_flagged">
+            <input type="hidden" name="individual_question_time" id="individual-question-time">
+            <input type="hidden" name="stopped_for_time" id="stopped_for_time">
+            
+            <!-- Description + Submit / Next Button -->
             <div style="margin-top: 1.5rem;">
-                <button type="button" id="show-descriptions-btn" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">查看類別說明</button>
-                <button class="btn btn-primary btn-lg sub-btn" type="submit" style="width: 100%;">Submit</button>
+                <button type="button" id="show-descriptions-btn" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">查看鍵盤快速鍵和類別描述</button>
+                <button class="btn btn-primary btn-lg sub-btn" id="submit-button" type="submit" style="width: 100%;">下一个</button>
             </div>
         </form>
     </div>
@@ -116,6 +154,81 @@
     </div>
 
     <script>
+        const flagButton = document.getElementById('flag-button');
+        let isFlagged = false;
+
+        flagButton.addEventListener('click', () => {
+            
+            if (!isFlagged) {
+                // flag question
+                isFlagged = true;
+                document.getElementById('is_flagged').value = true
+                flagButton.classList.add('flagged');
+                flagButton.textContent = '錯誤已確認';
+
+                document.getElementById('is_flagged').value = true;
+            } else {
+                // Resume the timer
+                isFlagged = false;
+                document.getElementById('is_flagged').value = false
+                flagButton.classList.remove('flagged');
+                flagButton.textContent = '問題錯誤';
+
+                document.getElementById('is_flagged').value = false;
+            }
+        });
+
+        let isPaused = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const stopButton = document.getElementById('stop-button');
+            const submitButton = document.getElementById('submit-button');
+            const pauseTime = 0;
+
+            let totalElapsedTime = 0;
+            let lastClickTime = Date.now();
+            
+
+            let pauseStartTime = 0;
+            let totalPauseTime = 0;
+
+            stopButton.addEventListener('click', () => {
+                if (!isPaused) {
+                    // Pause the timer
+                    isPaused = true;
+                    totalElapsedTime += Date.now() - lastClickTime;
+                    pauseStartTime = Date.now();
+                    stopButton.textContent = '已暫停';
+                    stopButton.classList.add('paused');
+                    submitButton.classList.add('hidden');
+                    console.log(`Timer paused. Total elapsed time: ${(totalElapsedTime / 1000).toFixed(2)}s`);
+                } else {
+                    // Resume the timer
+                    isPaused = false;
+                    lastClickTime = Date.now();
+                    totalPauseTime += Date.now() - pauseStartTime;
+                    stopButton.textContent = '暫停';
+                    stopButton.classList.remove('paused');
+                    submitButton.classList.remove('hidden');
+                    console.log("Timer resumed.");
+                }
+            });
+
+            document.getElementById('question-form').addEventListener('submit', function(event) {
+                if (!isPaused) {
+                    totalElapsedTime += Date.now() - lastClickTime;
+                }
+
+                const finalElapsedTime = totalElapsedTime / 1000; // Convert to seconds
+                const finalPauseTime = totalPauseTime / 1000; // Convert to seconds
+                console.log("elapsedTime: ", finalElapsedTime*1e-3)
+
+                document.getElementById('individual-question-time').value = finalElapsedTime;
+                document.getElementById('stopped_for_time').value = finalPauseTime;
+            });
+        });
+        
+
         const descriptions = {{ descriptions | tojson | safe }};
         const categories = {{ categories | tojson | safe }};
         // console.log("desc outside", descriptions)
@@ -127,6 +240,38 @@
         
         function renderDescriptions() {
             descriptionsContent.innerHTML = '';
+
+            // Add the keyboard shortcut description first
+            const shortcutSection = document.createElement('div');
+            shortcutSection.innerHTML = `
+                <h3>鍵盤快速鍵</h3>
+                <p>使用這些快速鍵可以加快您的測驗速度：</p>
+                <h4>選擇問題難度</h4>
+                <ul>
+                    <li>按數字鍵 <b>1</b> 到 <b>5</b> 來設定問題難度。</li>
+                </ul>
+                <h4>選擇題答案</h4>
+                <ul>
+                    <li>按 <b>Q</b>, <b>W</b>, <b>E</b>, <b>R</b>, 或 <b>T</b> 來選擇對應的答案選項。</li>
+                </ul>
+                <h4>選擇下一個問題類別</h4>
+                <p>按鍵盤左下角的鍵來選擇類別。</p>
+                <ul>
+                    <li>對於第一排的類別，請按 <b>A</b>, <b>S</b>, <b>D</b>, <b>F</b>。</li>
+                    <li>對於第二排的類別，請按 <b>Z</b>, <b>X</b>, <b>C</b>, <b>V</b>。</li>
+                </ul>
+                <h4>其他動作</h4>
+                <ul>
+                    <li>使用向上(<b>🔼</b>)和向下(<b>🔽</b>)箭頭鍵導航</li>
+                    <li>按分號鍵 (<b>;</b>) 標記問題本身是否有錯誤</li>
+                    <li>按單引號鍵 (<b>'</b>) 暫停或恢復測驗計時。</li>
+                    <li>按 <b>Enter</b> 鍵提交您的答案並進入下一題。</li>
+                </ul>
+                <hr>
+                <h3 style="margin-top: 1rem;">類別說明</h3>
+            `;
+            descriptionsContent.appendChild(shortcutSection);
+
             // console.log("keys: ", Object.keys(categories))
             Object.keys(categories).forEach(key => {
                 const categoryName = categories[key];
@@ -161,13 +306,15 @@
         // Add keyboard shortcuts
         document.addEventListener('keydown', (event) => {
             const key = event.key.toLowerCase();
+            console.log("Pressed this key: ", key)
 
             // Handle choices (keys 1-5)
-            if (key >= '1' && key <= '5') {
-                const choiceIndex = parseInt(key, 10);
+            const choiceMap = { 'q': '0', 'w': '1', 'e': '2', 'r': '3', 't': '4' };
+            const choiceIndex = choiceMap[key];
+            if (choiceIndex) {
                 const choiceKeys = Object.keys({{ choices | tojson | safe }});
-                if (choiceIndex > 0 && choiceIndex <= choiceKeys.length) {
-                    const choiceKey = choiceKeys[choiceIndex - 1];
+                if (parseInt(choiceIndex) < choiceKeys.length) {
+                    const choiceKey = choiceKeys[parseInt(choiceIndex)];
                     const choiceElement = document.getElementById(`choice-${choiceKey}`);
                     if (choiceElement) {
                         choiceElement.click();
@@ -175,10 +322,18 @@
                 }
             }
 
+            // Handle difficulty (keys 1-5)
+            if (key >= '1' && key <= '5') {
+                const difficultyInput = document.getElementById('difficulty');
+                if (difficultyInput) {
+                    difficultyInput.value = key;
+                }
+            }
+
             // Handle categories (keys q, w, e, r, a, s, d, f)
             const categoryMap = {
-                'q': '0', 'w': '1', 'e': '2', 'r': '3',
-                'a': '4', 's': '5', 'd': '6', 'f': '7'
+                'a': '0', 's': '1', 'd': '2', 'f': '3',
+                'z': '4', 'x': '5', 'c': '6', 'v': '7'
             };
             const categoryIndex = categoryMap[key];
             console.log(categoryIndex)
@@ -187,6 +342,21 @@
                 if (categoryElement) {
                     categoryElement.click();
                 }
+            }
+            
+
+            if (key == ';') {
+                document.getElementById('flag-button').click();
+            }
+            if (key == "'") {
+                document.getElementById('stop-button').click();
+            }
+            // console.log("isPaused is : ", isPaused)
+            // console.log("isPaused == false  is : ", isPaused == false)
+            // console.log("key == 'enter'  is : ", key == 'enter')
+            // console.log("key == 'enter' && isPaused == false: is ", key == 'enter' && isPaused == false )
+            if (key == 'enter' && isPaused == false) {
+                document.getElementById('submit-button').click();
             }
         });
         

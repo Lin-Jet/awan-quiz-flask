@@ -233,6 +233,67 @@ form hr {
     border: 1px dashed #525976;
 }
 
+.ques-infobar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.ques-infobar-buttons{
+    display: flex;
+}
+.ques-infobar-buttons > .flag-button{
+    margin-right: 1rem;
+}
+
+.flag-button {
+    width: 6rem;
+    height: 2.5rem;
+    background: #ef233c;
+    font-size: 1.25rem;
+    color: white;
+    border: none;
+    border-radius: 0.3rem;
+    transition-duration: 0.4s;
+}
+.flag-button:hover{
+    cursor: pointer;
+    background-color: #e21c34;
+    transition-duration: 0.4s;
+}
+.flag-button.flagged {
+    transition-duration: 0s;
+    width: 7rem;
+    background-color: #e5b121;
+}
+.flag-button.flagged:hover {
+    background-color: #e5b120;
+}
+
+
+.stop-button {
+    width: 3.5rem;
+    height: 2.5rem;
+    background: #ef233c;
+    font-size: 1.25rem;
+    color: white;
+    border: none;
+    border-radius: 0.3rem;
+    transition-duration: 0.4s;
+}
+.stop-button:hover{
+    cursor: pointer;
+    background-color: #e21c34;
+    transition-duration: 0.4s;
+}
+.stop-button.paused {
+    transition-duration: 0s;
+    width: 5rem;
+    background-color: #2a9d8f;
+}
+.stop-button.paused:hover {
+    background-color: #218376;
+}
+
 
 .ques-heading {
     font-size: 1.5em;
@@ -277,8 +338,21 @@ form hr {
     max-width: 60rem;
 }
 
+.difficulty-selection-section{
+    padding-top: 2rem; 
+    margin-top: 2rem; 
+    border-top: 1px solid #e5e7eb;
+    /* outline: blue solid 3px; */
+    max-width: 60rem;
+}
+
 .sub-btn {
     display: block;
+    margin-left: auto;
+}
+
+.sub-btn.hidden {
+    display: none;
     margin-left: auto;
 }
 
