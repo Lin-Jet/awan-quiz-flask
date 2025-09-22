@@ -51,6 +51,33 @@ def register():
         return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
 
+# New route to determine the starting question
+@app.route('/start_quiz')
+def start_quiz():
+    if not g.user:
+        return redirect(url_for('login'))
+    
+    # Find the last question the user answered
+    last_answered_id = db.session.query(func.max(User_Interactions.question_id)).filter_by(user_id=g.user.id).scalar()
+    
+    # The next question will be the last one answered's ID + 1.
+    # The question() route expects a 1-based index, and our database is 0-based.
+    if last_answered_id is not None:
+        next_question_id = last_answered_id + 1
+    else:
+        # For new users, or users who haven't started, begin at the first question (id=0).
+        next_question_id = 0
+    
+    # Check if this question exists.
+    question_exists = Questions.query.filter_by(id=next_question_id).first()
+    
+    if question_exists:
+        # Redirect to the question, adjusting for the 1-based URL
+        return redirect(url_for('question', id=(next_question_id + 1)))
+    else:
+        # If no more questions, redirect to the score page.
+        return redirect(url_for('score'))
+
 
 @app.route('/question/<int:id>', methods=['GET', 'POST'])
 def question(id):
