@@ -1,6 +1,9 @@
 from app import app
 from flask import render_template, request, redirect, url_for, session, g, flash
-from werkzeug.urls import url_parse
+
+# from werkzeug.urls import url_parse
+from urllib.parse import urlparse
+
 from app.forms import LoginForm, RegistrationForm, QuestionForm, CATEGORY_MAP, CAT_LIST
 from app.models import User, Questions, User_Interactions
 from app import db
