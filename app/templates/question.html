@@ -52,10 +52,10 @@
     </style>
 
     <div class="ques-div">
-        <form method="post" id="question-form">
+        <form method="post" id="question-form" class="question-form">
             {{ form.hidden_tag() }}
             <div class="ques-infobar">
-                <h2 class="qnum">Question {{q.id + 1}}/{{total_questions}} {{is_multi_select_txt}}.</h2>
+                <h2 class="qnum">{{title}} {{is_multi_select_txt}}.</h2>
 
                 <div class="ques-infobar-buttons">
                     <button type="button" class="flag-button" id="flag-button">問題錯誤</button>
@@ -201,7 +201,7 @@
                     stopButton.textContent = '已暫停';
                     stopButton.classList.add('paused');
                     submitButton.classList.add('hidden');
-                    console.log(`Timer paused. Total elapsed time: ${(totalElapsedTime / 1000).toFixed(2)}s`);
+                    // console.log(`Timer paused. Total elapsed time: ${(totalElapsedTime / 1000).toFixed(2)}s`);
                 } else {
                     // Resume the timer
                     isPaused = false;
@@ -210,7 +210,7 @@
                     stopButton.textContent = '暫停';
                     stopButton.classList.remove('paused');
                     submitButton.classList.remove('hidden');
-                    console.log("Timer resumed.");
+                    // console.log("Timer resumed.");
                 }
             });
 
@@ -221,7 +221,7 @@
 
                 const finalElapsedTime = totalElapsedTime / 1000; // Convert to seconds
                 const finalPauseTime = totalPauseTime / 1000; // Convert to seconds
-                console.log("elapsedTime: ", finalElapsedTime*1e-3)
+                // console.log("elapsedTime: ", finalElapsedTime*1e-3)
 
                 document.getElementById('individual-question-time').value = finalElapsedTime;
                 document.getElementById('stopped_for_time').value = finalPauseTime;
@@ -306,7 +306,7 @@
         // Add keyboard shortcuts
         document.addEventListener('keydown', (event) => {
             const key = event.key.toLowerCase();
-            console.log("Pressed this key: ", key)
+            // console.log("Pressed this key: ", key)
 
             // Handle choices (keys 1-5)
             const choiceMap = { 'q': '0', 'w': '1', 'e': '2', 'r': '3', 't': '4' };
@@ -336,7 +336,7 @@
                 'z': '4', 'x': '5', 'c': '6', 'v': '7'
             };
             const categoryIndex = categoryMap[key];
-            console.log(categoryIndex)
+            // console.log(categoryIndex)
             if (categoryIndex) {
                 const categoryElement = document.getElementById(`category-${categoryIndex}`);
                 if (categoryElement) {

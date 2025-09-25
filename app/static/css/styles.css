@@ -217,6 +217,10 @@ nav {
 
 /* Question Page CSS */
 
+.question-form{
+    padding: 0rem 2rem 0rem 2rem;
+}
+
 .ques-div {
     background-color: #fff;
     display: flex;
@@ -387,8 +391,8 @@ form hr {
     justify-content: center;
     border: 10px solid #107eeb;
     border-radius: 50%;
-    width: 140px;
-    height: 140px;
+    width: fit-content;
+    height: fit-content;
     margin-top: 15px;
 }
 

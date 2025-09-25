@@ -10,6 +10,8 @@ class User(db.Model):
     total_score = db.Column(db.Integer)
     total_answered = db.Column(db.Integer)
     total_time = db.Column(db.Float)
+
+    assigned_questions = db.Column(db.Text)
     
     # Relationship to user_interactions
     interactions = db.relationship('User_Interactions', backref='user', lazy=True)
