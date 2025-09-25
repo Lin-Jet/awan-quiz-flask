@@ -58,8 +58,8 @@
                 <h2 class="qnum">{{title}} {{is_multi_select_txt}}.</h2>
 
                 <div class="ques-infobar-buttons">
-                    <button type="button" class="flag-button" id="flag-button">問題錯誤</button>
-                    <button type="button" class="stop-button" id="stop-button">暫停</button>
+                    <button type="button" class="flag-button" id="flag-button">問題報錯</button>
+                    <button type="button" class="stop-button" id="stop-button">暫停一下</button>
                 </div>
             </div>
 
@@ -90,7 +90,7 @@
 
             <!-- Category Selection Section -->
             <div class="category-selection-section">
-                <h2 style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">請選擇下一個問題的類別</h2>
+                <h2 style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">此問題的類別你覺得是？(至多三種)</h2>
                 <!-- this shuold have have the categories wit hcheckboxes cause you cna selsct mutlipel ... -->
                 <div class="row">
                     {% for option in form.category %}
@@ -114,7 +114,7 @@
 
             <!-- Difficulty Selection Section -->
             <div class="difficulty-selection-section">
-                <h2 style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">請選擇問題難度（1至5之間）</h2>
+                <h2 style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">對你來說問題困難度？(1~5)</h2>
                 <div class="flex justify-center">
                     {{ form.difficulty(
                         class="w-20 px-4 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",

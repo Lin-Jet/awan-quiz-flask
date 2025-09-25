@@ -250,13 +250,13 @@ form hr {
 }
 
 .flag-button {
-    width: 6rem;
+    width: 7rem;
     height: 2.5rem;
     background: #ef233c;
     font-size: 1.25rem;
     color: white;
     border: none;
-    border-radius: 0.3rem;
+    border-radius: 0.3rem;`
     transition-duration: 0.4s;
 }
 .flag-button:hover{
@@ -275,7 +275,7 @@ form hr {
 
 
 .stop-button {
-    width: 3.5rem;
+    width: 7rem;
     height: 2.5rem;
     background: #ef233c;
     font-size: 1.25rem;
@@ -320,7 +320,7 @@ form hr {
     padding: 10px;
     width: 95%;
     height: 30px;
-    margin-bottom: 17px;
+    margin-bottom: 15px;
     margin-top: 15px;
 }
 
@@ -361,7 +361,7 @@ form hr {
 }
 
 .check-circle{
-    font-size: 1.4em;
+    font-size: 1.5em;
     color: #3e4667;
 }
 
