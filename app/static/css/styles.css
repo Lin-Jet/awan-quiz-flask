@@ -291,7 +291,7 @@ form hr {
 }
 .stop-button.paused {
     transition-duration: 0s;
-    width: 5rem;
+    width: 7rem;
     background-color: #2a9d8f;
 }
 .stop-button.paused:hover {

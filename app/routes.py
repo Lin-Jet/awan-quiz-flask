@@ -52,8 +52,8 @@ def register():
         # The user_id is a 1-based integer from the database.
         # We need to use floor division to get the correct block.
         block_index = (user.id - 1) // 3
-        start_id = block_index * 300
-        end_id = start_id + 300
+        start_id = block_index * 150
+        end_id = start_id + 150
         assigned_ids = list(range(start_id, end_id))
 
         user.assigned_questions = json.dumps(assigned_ids)

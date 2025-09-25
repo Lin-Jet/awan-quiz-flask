@@ -57,5 +57,6 @@ if __name__ == '__main__':
         # The code inside this block can now access the database
         # huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/Full_TechTCM_Evaluation_Set.json"
         # huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/multi_single_mix.json"
-        huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/10000_items.json"
+        # huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/10000_items.json"
+        huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/5000_items.json"
         load_questions_from_json_url(huggingface_url)

@@ -69,21 +69,25 @@
             <div class="options-div">
                 {% if is_multi_select %}
                     {% for key, value in choices.items() %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="options" value="{{ key }}" id="choice-{{ key }}">
-                            <label class="form-check-label" for="choice-{{ key }}">
-                                {{ value }}
-                            </label>
-                        </div>
+                        {% if value != "" %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="options" value="{{ key }}" id="choice-{{ key }}">
+                                <label class="form-check-label" for="choice-{{ key }}">
+                                    {{ value }}
+                                </label>
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 {% else %}
                     {% for key, value in choices.items() %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="options" value="{{ key }}" id="choice-{{ key }}">
-                            <label class="form-check-label" for="choice-{{ key }}">
-                                {{ value }}
-                            </label>
-                        </div>
+                        {% if value != "" %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="options" value="{{ key }}" id="choice-{{ key }}">
+                                <label class="form-check-label" for="choice-{{ key }}">
+                                    {{ value }}
+                                </label>
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
             </div>
@@ -207,7 +211,7 @@
                     isPaused = false;
                     lastClickTime = Date.now();
                     totalPauseTime += Date.now() - pauseStartTime;
-                    stopButton.textContent = '暫停';
+                    stopButton.textContent = '暫停一下';
                     stopButton.classList.remove('paused');
                     submitButton.classList.remove('hidden');
                     // console.log("Timer resumed.");
@@ -259,6 +263,7 @@
                 <ul>
                     <li>對於第一排的類別，請按 <b>A</b>, <b>S</b>, <b>D</b>, <b>F</b>。</li>
                     <li>對於第二排的類別，請按 <b>Z</b>, <b>X</b>, <b>C</b>, <b>V</b>。</li>
+                    <li>對於第三排的類別，請按 <b>B</b>, <b>N</b>。</li>
                 </ul>
                 <h4>其他動作</h4>
                 <ul>
@@ -303,22 +308,28 @@
             }
         });
 
+        // Dynamically get the available choices for keyboard shortcuts
+        const choiceKeys = Object.keys({{ choices | tojson | safe }});
+
         // Add keyboard shortcuts
         document.addEventListener('keydown', (event) => {
             const key = event.key.toLowerCase();
             // console.log("Pressed this key: ", key)
 
-            // Handle choices (keys 1-5)
-            const choiceMap = { 'q': '0', 'w': '1', 'e': '2', 'r': '3', 't': '4' };
-            const choiceIndex = choiceMap[key];
-            if (choiceIndex) {
-                const choiceKeys = Object.keys({{ choices | tojson | safe }});
-                if (parseInt(choiceIndex) < choiceKeys.length) {
-                    const choiceKey = choiceKeys[parseInt(choiceIndex)];
-                    const choiceElement = document.getElementById(`choice-${choiceKey}`);
-                    if (choiceElement) {
-                        choiceElement.click();
-                    }
+            // Dynamic map for choices based on available keys
+            const choiceMap = {};
+            choiceKeys.forEach((choiceKey, index) => {
+                const mapKeys = ['q', 'w', 'e', 'r', 't'];
+                if (index < mapKeys.length) {
+                    choiceMap[mapKeys[index]] = choiceKey;
+                }
+            });
+
+            // Handle choices (keys a,b,c,d,e)
+            if (choiceMap[key]) {
+                const choiceElement = document.getElementById(`choice-${choiceMap[key]}`);
+                if (choiceElement) {
+                    choiceElement.click();
                 }
             }
 
@@ -333,7 +344,8 @@
             // Handle categories (keys q, w, e, r, a, s, d, f)
             const categoryMap = {
                 'a': '0', 's': '1', 'd': '2', 'f': '3',
-                'z': '4', 'x': '5', 'c': '6', 'v': '7'
+                'z': '4', 'x': '5', 'c': '6', 'v': '7',
+                'b': '8', 'n': '9'
             };
             const categoryIndex = categoryMap[key];
             // console.log(categoryIndex)
