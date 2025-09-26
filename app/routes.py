@@ -20,7 +20,7 @@ def before_request():
 
 @app.route('/')
 def home():
-    return render_template('index.html', title='Home')
+    return render_template('index.html', title='Home', categories=CATEGORY_MAP, descriptions=json.dumps(CAT_LIST))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -51,9 +51,16 @@ def register():
         # New logic to assign a deterministic block of questions
         # The user_id is a 1-based integer from the database.
         # We need to use floor division to get the correct block.
-        block_index = (user.id - 1) // 3
-        start_id = block_index * 150
-        end_id = start_id + 150
+        ### for 5,000 questions, 100 users, 150 questions per user
+        # block_index = (user.id - 1) // 3
+        # start_id = block_index * 150
+        # end_id = start_id + 150
+
+        ### for demo 20    questions 2 users, 10 questions each
+        block_index = (user.id - 1) // 1
+        start_id = block_index * 10
+        end_id = start_id + 10
+
         assigned_ids = list(range(start_id, end_id))
 
         user.assigned_questions = json.dumps(assigned_ids)
@@ -135,6 +142,9 @@ def question(id):
     form.options.choices = list(q_choices.items())
     form.category.choices = list(CATEGORY_MAP.items())
 
+    # Create a list of difficulty choices to pass to the template
+    DIFFICULTY_CHOICES = {1: '1', 2: '2', 3: '3', 4: '4', 5: '5'}
+
     # print("is form valid on submit: ", form.validate_on_submit())
     if form.validate_on_submit():
         # Check if the question has a single or multiple correct answers
@@ -182,11 +192,12 @@ def question(id):
         interaction.stopped_for = float(stopped_for_time) if stopped_for_time else 0 
 
         selected_categories = request.form.getlist('category')
-        category_list_str = ','.join(sorted(selected_categories))
-        # print("category lsit string: ", category_list_str)
+        category_list_str = json.dumps(list(selected_categories))
+        print("category lsit string: ", category_list_str)
         interaction.selected_category = category_list_str
 
 
+        difficulties = [1,2,3,4,5]
         # print("form.difficulty.data: ", form.difficulty.data)
         interaction.selected_difficulty = form.difficulty.data 
 
@@ -217,7 +228,7 @@ def question(id):
     # print("is_multi_select_txt: ", is_multi_select_txt)
 
     return render_template('question.html', form=form, score=session['total_score'], total_questions=total_user_questions, is_multi_select_txt=is_multi_select_txt, q=q, choices=q_choices, is_multi_select=is_multi_select, 
-                           title='問題 {}/{}'.format(current_question_number, total_user_questions), categories=CATEGORY_MAP, descriptions=json.dumps(CAT_LIST))
+                           title='問題 {}/{}'.format(current_question_number, total_user_questions), categories=CATEGORY_MAP, difficulties=DIFFICULTY_CHOICES, descriptions=json.dumps(CAT_LIST))
 
 
 @app.route('/score')

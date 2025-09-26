@@ -120,14 +120,23 @@
             <div class="difficulty-selection-section">
                 <h2 style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">對你來說問題困難度？(1~5)</h2>
                 <div class="flex justify-center">
-                    {{ form.difficulty(
+                    <!--with a single input text box-->
+                    <!-- {{ form.difficulty(
                         class="w-20 px-4 py-2 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
                         placeholder="1-5", 
                         type="number", 
                         min="1", 
                         max="5",
                         oninput="this.value = this.value.replace(/[^1-5]/g, '').slice(0, 1);"
-                    ) }}
+                    ) }} -->
+                        {% for key, value in difficulties.items() %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="difficulty" value="{{ key }}" id="difficulty-{{ key }}">
+                            <label class="form-check-label" for="difficulty-{{ key }}">
+                                {{ value }}
+                            </label>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -335,9 +344,16 @@
 
             // Handle difficulty (keys 1-5)
             if (key >= '1' && key <= '5') {
-                const difficultyInput = document.getElementById('difficulty');
-                if (difficultyInput) {
-                    difficultyInput.value = key;
+                //for input textbox
+                // const difficultyInput = document.getElementById('difficulty');
+                // if (difficultyInput) {
+                //     difficultyInput.value = key;
+                // }
+
+                //for radio buttons
+                const choiceElement = document.getElementById(`difficulty-${ key }`);
+                if (choiceElement) {
+                    choiceElement.click();
                 }
             }
 

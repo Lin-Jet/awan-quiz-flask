@@ -1,26 +1,166 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <style>
+        /* Basic CSS for the modal to ensure it works */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #6b7280;
+        }
+        .modal-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-body h4 {
+            font-weight: bold;
+            font-size: 1.125rem;
+            color: #1e40af;
+            margin-bottom: 0.25rem;
+        }
+        .modal-body p {
+            margin-bottom: 1rem;
+        }
+    </style>
+    
     <div class="home-div">
         <img src="{{ url_for('static', filename='images/home.jpg') }}" class="home-img">
         <div class="info-div">
             {% if g.user %}
-                <h1>Welcome {{ g.user.username }}, </h1>
+                <h1>欢迎 {{ g.user.username }}， </h1>
             {% else %}
-                <h1>Sign In, Guest </h1>
+            <h1>登录，访客 </h1>
             {% endif %}
             <h4>
-                Please answer the multiple choice question, 
+                请回答选择题（有单选题和多选题），
             </h4>
             <h4>
-                choose preferably 1 and no more than 2 categories, 
+                最好选择 1 个类别，最多 2 个，
             </h4>
             <h4>
-                and rate difficulty between 1-5.
+                并在 1-5 之间评分难度。
             </h4>
-            
-            <!-- <a href="{{ url_for('question', id=1)}}">Take the test</a> -->
-             <a href="{{ url_for('start_quiz')}}">Take the test</a>
+            <div style="margin-top: 1.5rem;">
+                <button type="button" id="show-descriptions-btn" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">查看键盘快捷键和类别描述的教程</button>
+            </div>
+
+            <!-- <a href="{{ url_for('question', id=1)}}">参加测试</a> -->
+            <a href="{{ url_for('start_quiz')}}">开始测试</a>
         </div>
     </div>
+    
+    <!-- Description Pop-up / Modal -->
+    <div id="descriptions-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="font-size: 1.5rem; font-weight: bold;">類別說明</h3>
+                <button id="close-modal-btn" class="modal-close">&times;</button>
+            </div>
+            <div id="descriptions-content" class="modal-body">
+                <!-- Descriptions will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        const descriptions = {{ descriptions | tojson | safe }};
+        const categories = {{ categories | tojson | safe }};
+        
+        const showDescriptionsBtn = document.getElementById('show-descriptions-btn');
+        const descriptionsModal = document.getElementById('descriptions-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const descriptionsContent = document.getElementById('descriptions-content');
+        
+        function renderDescriptions() {
+            descriptionsContent.innerHTML = '';
+
+            // Add the keyboard shortcut description first
+            const shortcutSection = document.createElement('div');
+            shortcutSection.innerHTML = `
+                <h3>鍵盤快速鍵</h3>
+                <p>使用這些快速鍵可以加快您的測驗速度：</p>
+                <h4>選擇問題難度</h4>
+                <ul>
+                    <li>按數字鍵 <b>1</b> 到 <b>5</b> 來設定問題難度。</li>
+                </ul>
+                <h4>選擇題答案</h4>
+                <ul>
+                    <li>按 <b>Q</b>, <b>W</b>, <b>E</b>, <b>R</b>, 或 <b>T</b> 來選擇對應的答案選項。</li>
+                </ul>
+                <h4>選擇下一個問題類別</h4>
+                <p>按鍵盤左下角的鍵來選擇類別。</p>
+                <ul>
+                    <li>對於第一排的類別，請按 <b>A</b>, <b>S</b>, <b>D</b>, <b>F</b>。</li>
+                    <li>對於第二排的類別，請按 <b>Z</b>, <b>X</b>, <b>C</b>, <b>V</b>。</li>
+                    <li>對於第三排的類別，請按 <b>B</b>, <b>N</b>。</li>
+                </ul>
+                <h4>其他動作</h4>
+                <ul>
+                    <li>使用向上(<b>🔼</b>)和向下(<b>🔽</b>)箭頭鍵導航</li>
+                    <li>按分號鍵 (<b>;</b>) 標記問題本身是否有錯誤</li>
+                    <li>按單引號鍵 (<b>'</b>) 暫停或恢復測驗計時。</li>
+                    <li>按 <b>Enter</b> 鍵提交您的答案並進入下一題。</li>
+                </ul>
+                <hr>
+                <h3 style="margin-top: 1rem;">類別說明</h3>
+            `;
+            descriptionsContent.appendChild(shortcutSection);
+
+            Object.keys(categories).forEach(key => {
+                const categoryName = categories[key];
+                const description = JSON.parse(descriptions)[key];
+                const section = document.createElement('div');
+                section.innerHTML = `
+                    <h4>${categoryName}</h4>
+                    <p>${description}</p>
+                `;
+                descriptionsContent.appendChild(section);
+            });
+        }
+
+        showDescriptionsBtn.addEventListener('click', () => {
+            renderDescriptions();
+            descriptionsModal.style.display = 'flex';
+        });
+        
+        closeModalBtn.addEventListener('click', () => {
+            descriptionsModal.style.display = 'none';
+        });
+
+        descriptionsModal.addEventListener('click', (event) => {
+            if (event.target === descriptionsModal) {
+                descriptionsModal.style.display = 'none';
+            }
+        });
+    </script>
 {% endblock %}

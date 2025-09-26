@@ -7,7 +7,8 @@
             <form action="" method="POST">
                 {{ form.hidden_tag() }}
                 <div class="register-intro">
-                    <h1>Create your <br>Account now!</h1>
+                    <!-- <h1>Create your <br>Account now!</h1> -->
+                     <h1>立即创建 <br>你的账户！</h1>
                 </div>
 
                 {% if form.username.errors or form.email.errors or form.password.errors or form.password2.errors %}
@@ -74,7 +75,8 @@
                 </div>
                 
                 <div class="form-para">
-                    <p>Already have an account? <a href="/login">Login</a></p>
+                    <!-- <p>Already have an account? <a href="/login">Login</a></p> -->
+                    <p>已有账户？<a href="/login">登录</a></p>
                 </div>
             </form>
         </div>

@@ -5,13 +5,17 @@
             <!-- <div class="highest-score">
                 <div>Highest Score: 80 by </div> <div class="high-score-name">John</div>
             </div> -->
-            <h1 class="score-head">Your Score</h1>
+            <!-- <h1 class="score-head">Your Score</h1> -->
+            <h1 class="score-head">您的分数</h1>
             <div class="score-circle">
                 <h1>{{ g.user.total_score }}/{{ g.user.total_answered }}</h1>
             </div>
-            <h1 class="congrats-cls">Congratulations! you completed this test in {{ g.user.total_time | round(2, 'ceil') }} seconds!</h1>
+            
+            <!-- <h1 class="congrats-cls">Congratulations! you completed this test in {{ g.user.total_time | round(2, 'ceil') }} seconds!</h1> -->
+            <h1 class="congrats-cls">恭喜！您在 {{ g.user.total_time | round(2, 'ceil') }} 秒内完成了此测试 !</h1>
+            
             <div class="redirect-links">
-                <a href="{{ url_for('home') }}"><i class='fas fa-angle-left'></i> Home</a>
+                <a href="{{ url_for('home') }}"><i class='fas fa-angle-left'></i> 首页</a> <!--Home button-->
                 <!-- <a href="#" class="btn btn-primary disabled" >Retake Test</a> -->
             </div>
     </div>

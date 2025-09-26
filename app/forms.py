@@ -33,28 +33,40 @@ CAT_LIST = {
 }
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    # username = StringField('Username', validators=[DataRequired()])
+    # password = PasswordField('Password', validators=[DataRequired()])
+    # remember_me = BooleanField('Remember Me')
+    # submit = SubmitField('Login')
+
+    username = StringField('用户名', validators=[DataRequired()])
+    password = PasswordField('密码', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
-    submit = SubmitField('Login')
+    submit = SubmitField('登录')
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=(DataRequired(), Email()))
-    password = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField('Confirm Password', 
+    # username = StringField('Username', validators=[DataRequired()])
+    # email = StringField('Email', validators=(DataRequired(), Email()))
+    # password = PasswordField('Password', validators=[DataRequired()])
+    # password2 = PasswordField('Confirm Password', 
+    #             validators=(DataRequired(), EqualTo('password')))
+    # submit = SubmitField('Register')
+
+    username = StringField('用户名', validators=[DataRequired()])
+    email = StringField('邮箱', validators=(DataRequired(), Email()))
+    password = PasswordField('密码', validators=[DataRequired()])
+    password2 = PasswordField('C确认密码', 
                 validators=(DataRequired(), EqualTo('password')))
-    submit = SubmitField('Register')
+    submit = SubmitField('注册')
 
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
-            raise ValidationError('Username already exists')
+            raise ValidationError('用户名已存在!')
     
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
-            raise ValidationError('Email already exists.')
+            raise ValidationError('邮箱已存在!')
 
 
 

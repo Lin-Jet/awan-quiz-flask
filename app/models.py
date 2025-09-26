@@ -54,7 +54,7 @@ class User_Interactions(db.Model):
     correctness = db.Column(db.Integer, nullable=False)
     individual_question_time = db.Column(db.Float, nullable=False)
     stopped_for = db.Column(db.Float, nullable=False)
-    selected_category = db.Column(db.String(64))
+    selected_category = db.Column(db.Text)
     selected_difficulty = db.Column(db.Integer)
     is_flagged = db.Column(db.Integer, nullable=False)
 
