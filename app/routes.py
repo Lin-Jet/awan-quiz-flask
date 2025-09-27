@@ -51,15 +51,20 @@ def register():
         # New logic to assign a deterministic block of questions
         # The user_id is a 1-based integer from the database.
         # We need to use floor division to get the correct block.
-        ### for 5,000 questions, 100 users, 150 questions per user
+        # ### for 5,000 questions, 100 users, 150 questions per user, 3 users per question
         # block_index = (user.id - 1) // 3
         # start_id = block_index * 150
         # end_id = start_id + 150
+        
+        ### for 6,000 questions, 100 users, 150 questions per user, 3 users per question
+        block_index = (user.id - 1) // 3
+        start_id = block_index * 150
+        end_id = start_id + 150
 
-        ### for demo 20    questions 2 users, 10 questions each
-        block_index = (user.id - 1) // 1
-        start_id = block_index * 10
-        end_id = start_id + 10
+        # ### for demo 20    questions 2 users, 10 questions each
+        # block_index = (user.id - 1) // 1
+        # start_id = block_index * 10
+        # end_id = start_id + 10
 
         assigned_ids = list(range(start_id, end_id))
 
@@ -150,16 +155,18 @@ def question(id):
         # Check if the question has a single or multiple correct answers
         is_multi_select = len(q.answer) > 1
         is_correct = False
+        user_options_multi = []
+        user_options_single = ""
         if is_multi_select:
             # For multiple-choice questions, `request.form.getlist` gets a list of selected values
-            user_options = request.form.getlist('options')
-            user_options.sort() # Sort to ensure consistent comparison
+            user_options_multi = request.form.getlist('options')
+            user_options_multi.sort() # Sort to ensure consistent comparison
             correct_options = sorted(list(q.answer)) # Sort the correct answer string
-            is_correct = (user_options == correct_options)
+            is_correct = (user_options_multi == correct_options)
         else:
             # For single-choice questions, `request.form['options']` gets the single selected value
-            user_option = request.form['options']
-            is_correct = (user_option == q.answer)
+            user_options_single = request.form['options']
+            is_correct = (user_options_single == q.answer)
 
         if is_correct:
             session['total_score'] = session.get('total_score', 0) + 1
@@ -183,6 +190,13 @@ def question(id):
         
         interaction.correctness = 1 if is_correct else 0
 
+        if is_multi_select:
+            # print("user_options_multi: ", user_options_multi)
+            # print("\".join(user_options_multi) ", "".join(user_options_multi))
+            interaction.selected_choices = json.dumps(user_options_multi) #using json.dumps() to save with double quotation marks
+        else:
+            interaction.selected_choices = user_options_single
+
         # Retrieve the individual question time from the hidden form field
         individual_question_time = request.form.get('individual_question_time')
         interaction.individual_question_time = float(individual_question_time) if individual_question_time else 0
@@ -193,7 +207,7 @@ def question(id):
 
         selected_categories = request.form.getlist('category')
         category_list_str = json.dumps(list(selected_categories))
-        print("category lsit string: ", category_list_str)
+        # print("category lsit string: ", category_list_str)
         interaction.selected_category = category_list_str
 
 

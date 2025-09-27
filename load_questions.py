@@ -60,5 +60,8 @@ if __name__ == '__main__':
         # huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/10000_items.json"
         
         #huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/5000_stratified_items.json"
-        huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/20_stratified_items.json"
+        #huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/20_stratified_items.json"
+        
+        huggingface_url = "https://huggingface.co/datasets/TechTCM/TCMBenchmark/resolve/main/6000_stratified_items.json"
+        
         load_questions_from_json_url(huggingface_url)

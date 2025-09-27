@@ -52,6 +52,8 @@ class User_Interactions(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'), primary_key=True)
     
     correctness = db.Column(db.Integer, nullable=False)
+    #add what answers they chose
+    selected_choices = db.Column(db.Text)
     individual_question_time = db.Column(db.Float, nullable=False)
     stopped_for = db.Column(db.Float, nullable=False)
     selected_category = db.Column(db.Text)
